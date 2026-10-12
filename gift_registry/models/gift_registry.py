@@ -204,15 +204,19 @@ class GiftRegistry(models.Model):
             title=self.title, code=self.name, status=status,
         )
 
-    def _get_event_notice_users(self):
-        """El responsable de la lista; si no tiene (o está archivado), los administradores."""
+    def _get_manager_users(self):
+        """Administradores de listas de regalos activos y con acceso a la empresa de la lista."""
         self.ensure_one()
-        if self.user_id.active:
-            return self.user_id
-        managers = self.env.ref("gift_registry.group_gift_registry_manager").all_user_ids
+        # sudo: quien dispara un aviso (un cajero, un pedido web) puede no poder leer los grupos
+        managers = self.env.ref("gift_registry.group_gift_registry_manager").sudo().all_user_ids
         return managers.filtered(
             lambda user: user.active and not user.share and self.company_id in user.company_ids
         )
+
+    def _get_event_notice_users(self):
+        """El responsable de la lista; si no tiene (o está archivado), los administradores."""
+        self.ensure_one()
+        return self.user_id if self.user_id.active else self._get_manager_users()
 
     @api.model
     def _cron_event_today_activity(self):

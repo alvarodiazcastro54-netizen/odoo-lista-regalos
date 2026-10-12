@@ -1,5 +1,11 @@
-from odoo import api, fields, models
+import logging
+
+from odoo import _, api, fields, models
 from odoo.tools import float_compare
+
+from .gift_registry import _format_qty
+
+_logger = logging.getLogger(__name__)
 
 
 class GiftRegistryLine(models.Model):
@@ -40,6 +46,8 @@ class GiftRegistryLine(models.Model):
     )
     note = fields.Char("Nota para el invitado")
     accept_other_variant = fields.Boolean("Acepta otra variante")
+    # Marca interna: ya se avisó a los administradores de que esta línea quedó excedida
+    exceeded_notified = fields.Boolean(readonly=True, copy=False)
 
     _qty_wanted_positive = models.Constraint(
         "CHECK(qty_wanted > 0)", "La cantidad deseada debe ser mayor que cero.",
@@ -68,6 +76,41 @@ class GiftRegistryLine(models.Model):
             cmp = float_compare(gifted, line.qty_wanted, precision_rounding=rounding)
             line.status = ("exceeded" if cmp > 0 else "done" if cmp == 0
                            else "partial" if gifted > 0 else "pending")
+
+    def _notify_exceeded(self):
+        """Avisa a los administradores cuando una línea queda excedida.
+
+        Lo llaman los canales de venta (caja y pedidos) después de registrar un
+        regalo. Se avisa una sola vez por línea; si deja de estar excedida, por
+        ejemplo tras una devolución, la marca se limpia para poder avisar otra vez.
+        """
+        today = fields.Date.context_today(self)
+        for line in self:
+            if line.status != "exceeded":
+                if line.exceeded_notified:
+                    line.exceeded_notified = False
+                continue
+            if line.exceeded_notified:
+                continue
+            registry = line.registry_id
+            managers = registry._get_manager_users()
+            if not managers:
+                # Sin marcar la línea: se avisará en cuanto haya a quién
+                _logger.warning(
+                    "Lista %s: regalo excedido y ningún administrador a quien avisar",
+                    registry.name)
+                continue
+            summary = _(
+                "Regalo excedido: %(product)s · %(code)s · %(gifted)s de %(wanted)s",
+                product=line.product_id.display_name, code=registry.name,
+                gifted=_format_qty(line.qty_gifted), wanted=_format_qty(line.qty_wanted),
+            )
+            for user in managers:
+                registry.activity_schedule(
+                    "mail.mail_activity_data_todo", date_deadline=today,
+                    summary=summary, user_id=user.id,
+                )
+            line.exceeded_notified = True
 
     @api.depends_context("warehouse_id")
     @api.depends("product_id")

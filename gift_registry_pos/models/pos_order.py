@@ -34,6 +34,8 @@ class PosOrder(models.Model):
     def action_pos_order_paid(self):
         res = super().action_pos_order_paid()
         self._gift_registry_notify()
+        # Si algún regalo superó lo deseado, aviso a los administradores (una vez por línea)
+        self.lines.gift_registry_line_id.sudo()._notify_exceeded()
         return res
 
     def _gift_registry_notify(self):

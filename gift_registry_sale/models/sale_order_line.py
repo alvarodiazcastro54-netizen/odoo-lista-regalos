@@ -47,4 +47,6 @@ class SaleOrder(models.Model):
                                 raise_if_not_found=False)
         for line in self.order_line.filtered("gift_registry_line_id"):
             template and template.send_mail(line.gift_registry_line_id.id)
+        # Si algún regalo superó lo deseado, aviso a los administradores (una vez por línea)
+        self.order_line.gift_registry_line_id.sudo()._notify_exceeded()
         return res

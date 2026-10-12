@@ -1,6 +1,6 @@
 from odoo import fields
 from odoo.exceptions import ValidationError
-from odoo.tests import tagged
+from odoo.tests import new_test_user, tagged
 
 from odoo.addons.point_of_sale.tests.common import TestPoSCommon
 
@@ -25,6 +25,13 @@ class TestGiftRegistryPos(TestPoSCommon):
         })
         cls.gift_list.action_activate()
         cls.reg_line = cls.gift_list.line_ids
+        # Las pruebas de la caja usan una empresa propia: los avisos a administradores
+        # solo van a quienes tienen acceso a la empresa de la lista
+        company = cls.gift_list.company_id
+        cls.manager = new_test_user(
+            cls.env, login="lr_admin_caja",
+            groups="base.group_user,gift_registry.group_gift_registry_manager",
+            company_id=company.id, company_ids=[(6, 0, company.ids)])
 
     def _sell(self, qty=1):
         order_data = self.create_ui_order_data([{
@@ -105,3 +112,44 @@ class TestGiftRegistryPos(TestPoSCommon):
             ("res_model", "=", "gift.registry"), ("res_id", "=", self.gift_list.id)])
         self.assertTrue(notices)
         self.assertEqual(set(notices.mapped("summary")), {prefix + "Lista completa"})
+
+    def _exceeded_notices(self):
+        return self.env["mail.activity"].search([
+            ("res_model", "=", "gift.registry"), ("res_id", "=", self.gift_list.id),
+            ("summary", "like", "Regalo excedido"),
+        ])
+
+    def test_05_exceeded_notice_for_managers(self):
+        """Al superar lo deseado se avisa una sola vez a cada administrador."""
+        managers = self.gift_list._get_manager_users()
+        self.assertIn(self.manager, managers)
+        self.open_new_session()
+
+        self._sell(2)
+        self.assertEqual(self.reg_line.status, "done")
+        self.assertFalse(self._exceeded_notices(), "Completar la lista no es un exceso")
+
+        third_order = self._sell(1)
+        self.assertEqual(self.reg_line.status, "exceeded")
+        notices = self._exceeded_notices()
+        self.assertEqual(len(notices), len(managers))
+        self.assertEqual(notices.user_id, managers)
+        self.assertEqual(
+            notices[0].summary,
+            f"Regalo excedido: {self.product.display_name} · {self.gift_list.name} · 3 de 2")
+
+        fourth_order = self._sell(1)
+        self.assertEqual(len(self._exceeded_notices()), len(managers), "No se duplica")
+
+        # Devolver los dos pedidos de más deja la línea completa: si se vuelve a
+        # exceder, se avisa de nuevo
+        for order in (third_order, fourth_order):
+            refund = self.env["pos.order"].browse(order.refund()["res_id"])
+            ctx = {"active_ids": refund.ids, "active_id": refund.id}
+            self.env["pos.make.payment"].with_context(**ctx).create(
+                {"payment_method_id": self.cash_pm1.id}).with_context(**ctx).check()
+        self.assertEqual(self.reg_line.status, "done")
+        self.assertFalse(self.reg_line.exceeded_notified)
+        self._exceeded_notices().unlink()
+        self._sell(1)
+        self.assertEqual(len(self._exceeded_notices()), len(managers))
