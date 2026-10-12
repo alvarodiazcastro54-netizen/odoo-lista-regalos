@@ -15,6 +15,7 @@
         "data/ir_cron_data.xml",
         "views/gift_registry_views.xml",
         "views/gift_registry_line_views.xml",
+        "views/gift_registry_event_type_views.xml",
         "report/gift_registry_report_views.xml",
         "views/gift_registry_menus.xml",
     ],

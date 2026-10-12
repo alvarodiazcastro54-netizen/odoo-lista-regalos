@@ -14,4 +14,6 @@
     <menuitem id="menu_gift_registry_config" name="Configuración"
               parent="menu_gift_registry_root" sequence="90"
               groups="group_gift_registry_manager"/>
+    <menuitem id="menu_gift_registry_event_type" parent="menu_gift_registry_config"
+              action="gift_registry_event_type_action" sequence="10"/>
 </odoo>

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.fields import Command
 from odoo.tools import float_compare, float_round
 
 _logger = logging.getLogger(__name__)
@@ -107,6 +108,17 @@ class GiftRegistry(models.Model):
             registry.has_exceeded_lines = any(
                 line.status == "exceeded" for line in registry.line_ids
             )
+
+    @api.onchange("event_type_id")
+    def _onchange_event_type_id(self):
+        """Propone los productos sugeridos del tipo de evento en una lista aún sin productos."""
+        suggested = self.event_type_id.template_line_ids
+        if self.line_ids or not suggested:
+            return
+        self.line_ids = [
+            Command.create({"product_id": product.id, "qty_wanted": 1.0})
+            for product in suggested
+        ]
 
     @api.constrains("state", "consent_data")
     def _check_consent(self):
