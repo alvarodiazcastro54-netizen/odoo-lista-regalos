@@ -24,14 +24,19 @@ export class GiftRegistryDialog extends Component {
         }
         this.state.searching = true;
         try {
+            let found = false;
             if (!this.isOffline) {
                 // Busca en todo Odoo y conecta el resultado con los modelos locales
-                await this.pos.data.callRelated(
+                found = await this.pos.data.callRelated(
                     "gift.registry", "search_for_pos", [query, this.pos.config.id],
                     {}, false, true
                 );
             }
-            this.state.results = this.searchLocal(query);
+            // Con conexión manda el servidor: solo él conoce el DNI y ya aplica la privacidad.
+            // Sin conexión se filtra lo cargado al abrir la caja (código o nombre).
+            this.state.results = found
+                ? found["gift.registry"] || []
+                : this.searchLocal(query);
         } finally {
             this.state.searching = false;
         }
