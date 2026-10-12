@@ -17,6 +17,23 @@ def _format_qty(qty):
     return f"{qty:.2f}".rstrip("0").rstrip(".")
 
 
+def _mask_tail(value, visible):
+    """Deja ver solo el final: "45678912" -> "••••8912". Siempre cuatro puntos,
+    para no revelar tampoco la longitud del dato."""
+    value = "".join((value or "").split())
+    if not value:
+        return False
+    return "••••" + (value[-visible:] if len(value) > visible else "")
+
+
+def _mask_email(value):
+    """Primera letra y dominio: "lucia.ramos@gmail.com" -> "l•••@gmail.com"."""
+    name, at, domain = (value or "").strip().partition("@")
+    if not name or not at:
+        return _mask_tail(value, 0)
+    return f"{name[0]}•••@{domain}"
+
+
 class GiftRegistry(models.Model):
     _name = "gift.registry"
     _description = "Lista de regalos"
@@ -35,6 +52,11 @@ class GiftRegistry(models.Model):
         tracking=True, check_company=True,
     )
     partner_name = fields.Char(related="partner_id.name", string="Nombre del dueño")
+    # Datos del dueño enmascarados: sirven para confirmar que es la persona correcta
+    # sin mostrar el dato completo (el cajero no abre la ficha del contacto desde aquí)
+    partner_vat_masked = fields.Char("DNI (parcial)", compute="_compute_partner_masked")
+    partner_phone_masked = fields.Char("Teléfono (parcial)", compute="_compute_partner_masked")
+    partner_email_masked = fields.Char("Correo (parcial)", compute="_compute_partner_masked")
     event_type_id = fields.Many2one(
         "gift.registry.event.type", "Tipo de evento", required=True,
     )
@@ -88,6 +110,14 @@ class GiftRegistry(models.Model):
         "UNIQUE(name, company_id)",
         "El código de la lista debe ser único por empresa.",
     )
+
+    @api.depends("partner_id.vat", "partner_id.phone", "partner_id.email")
+    def _compute_partner_masked(self):
+        for registry in self:
+            partner = registry.partner_id.sudo()
+            registry.partner_vat_masked = _mask_tail(partner.vat, 4)
+            registry.partner_phone_masked = _mask_tail(partner.phone, 3)
+            registry.partner_email_masked = _mask_email(partner.email)
 
     @api.depends("event_date")
     def _compute_close_date(self):

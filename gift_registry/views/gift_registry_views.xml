@@ -44,7 +44,15 @@
                         <h2><field name="title" placeholder="Cumpleaños de Ana"/></h2></div>
                     <group>
                         <group>
-                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <!-- Solo el administrador de listas abre la ficha completa del dueño -->
+                            <field name="partner_id" readonly="state != 'draft'"
+                                   groups="gift_registry.group_gift_registry_manager"/>
+                            <field name="partner_id" readonly="state != 'draft'"
+                                   options="{'no_open': True}"
+                                   groups="!gift_registry.group_gift_registry_manager"/>
+                            <field name="partner_vat_masked" invisible="not partner_vat_masked"/>
+                            <field name="partner_phone_masked" invisible="not partner_phone_masked"/>
+                            <field name="partner_email_masked" invisible="not partner_email_masked"/>
                             <field name="event_type_id"/>
                             <field name="event_date"/>
                             <field name="close_date"/>
@@ -99,8 +107,12 @@
         <field name="model">gift.registry</field>
         <field name="arch" type="xml">
             <search>
-                <field name="name" string="Lista" filter_domain="['|', '|', ('name', 'ilike', self), ('title', 'ilike', self), ('partner_id', 'child_of', raw_value)]"/>
-                <field name="partner_id"/>
+                <!-- La búsqueda no pasa por la de contactos, que mira DNI y correo de forma parcial -->
+                <field name="name" string="Lista" filter_domain="['|', '|', ('name', 'ilike', self), ('title', 'ilike', self), ('partner_id.name', 'ilike', self)]"/>
+                <field name="partner_name" string="Dueño de la lista"/>
+                <!-- DNI solo con coincidencia exacta, igual que en la caja. Se cuelga del campo
+                     "title" únicamente porque un campo de búsqueda necesita uno de texto -->
+                <field name="title" string="DNI del dueño (exacto)" filter_domain="[('partner_id.vat', '=', self)]"/>
                 <filter name="active_lists" string="Activas" domain="[('state', '=', 'active')]"/>
                 <!-- Los separadores hacen que estado, fecha y excedidos se combinen con "Y" -->
                 <separator/>
