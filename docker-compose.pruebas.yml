@@ -1,0 +1,24 @@
+# Servicio aparte para pruebas de pantalla (tours). No cambia "db" ni "odoo".
+# Solo se usa cuando se nombra este archivo además del principal:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.pruebas.yml build odoo-pruebas
+#   docker compose -f docker-compose.yml -f docker-compose.pruebas.yml run --rm odoo-pruebas ^
+#       odoo -d prueba_regalos -i gift_registry_pos,gift_registry_sale ^
+#       --test-tags /gift_registry_pos:TestGiftRegistryTour --stop-after-init
+#
+# Sin --no-http: el navegador de la prueba necesita el servidor web de Odoo.
+services:
+  odoo-pruebas:
+    build:
+      context: .
+      dockerfile: Dockerfile.pruebas
+    image: odoo-regalos-pruebas:19
+    depends_on:
+      - db
+    environment:
+      HOST: db
+      USER: odoo
+      PASSWORD: odoo
+    volumes:
+      - odoo-data:/var/lib/odoo
+      - ./addons:/mnt/extra-addons

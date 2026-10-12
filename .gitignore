@@ -1,9 +1,8 @@
-# Archivos que Python genera al ejecutar; no son código fuente
-__pycache__/
-*.py[cod]
+# Bocetos y hoja de comparación del tema (material de trabajo; lo útil está en docs/)
+propuestas-tema/
 
-# Restos de editores y sistema
+# Archivos del sistema y de editores
+Thumbs.db
+.DS_Store
 *.swp
 *~
-.DS_Store
-Thumbs.db

@@ -1,0 +1,9 @@
+# Archivos que Python genera al ejecutar; no son código fuente
+__pycache__/
+*.py[cod]
+
+# Restos de editores y sistema
+*.swp
+*~
+.DS_Store
+Thumbs.db

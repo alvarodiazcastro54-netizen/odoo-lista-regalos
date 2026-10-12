@@ -1,0 +1,13 @@
+# Imagen SOLO para pruebas de pantalla (tours).
+# Es la imagen oficial de Odoo más un navegador y la librería con la que Odoo lo maneja.
+# El servicio "odoo" normal sigue usando la imagen oficial, igual que producción.
+FROM odoo:19
+
+USER root
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates wget python3-websocket \
+    && wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
+    && apt-get install -y --no-install-recommends /tmp/chrome.deb \
+    && rm -f /tmp/chrome.deb \
+    && rm -rf /var/lib/apt/lists/*
+USER odoo
