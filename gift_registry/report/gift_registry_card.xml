@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Tarjeta de la lista para compartir con los invitados: A5 horizontal, una por hoja -->
+    <record id="paperformat_gift_registry_card" model="report.paperformat">
+        <field name="name">Tarjeta de lista de regalos (A5 horizontal)</field>
+        <field name="format">A5</field>
+        <field name="orientation">Landscape</field>
+        <field name="margin_top">8</field>
+        <field name="margin_bottom">8</field>
+        <field name="margin_left">8</field>
+        <field name="margin_right">8</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+        <field name="disable_shrinking" eval="True"/>
+    </record>
+
+    <record id="action_report_gift_registry_card" model="ir.actions.report">
+        <field name="name">Tarjeta de la lista</field>
+        <field name="model">gift.registry</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">gift_registry.report_gift_registry_card</field>
+        <field name="report_file">gift_registry.report_gift_registry_card</field>
+        <field name="print_report_name">'Tarjeta - %s' % object.name</field>
+        <field name="binding_model_id" ref="model_gift_registry"/>
+        <field name="binding_type">report</field>
+        <field name="paperformat_id" ref="paperformat_gift_registry_card"/>
+    </record>
+
+    <template id="report_gift_registry_card">
+        <t t-call="web.basic_layout">
+            <!-- Tablas y medidas fijas: el generador de PDF no entiende diseños flexibles -->
+            <style>
+                .gr-card { color: #11151B; }
+                .gr-card table { width: 100%; border-collapse: collapse; border: 0 none; }
+                .gr-card td { border: 0 none; }
+                .gr-card-band td { background-color: #11151B; color: #FFFFFF; padding: 5mm 7mm; vertical-align: middle; }
+                .gr-card-band td.gr-card-store { font-size: 13pt; font-weight: bold; }
+                .gr-card-store img { max-height: 12mm; max-width: 60mm; }
+                .gr-card-band td.gr-card-kicker { text-align: right; font-size: 9pt; font-weight: bold; letter-spacing: 2.5pt; color: #FFB81C; }
+                .gr-card-body td { vertical-align: middle; padding: 15mm 7mm 13mm 7mm; }
+                /* Marco gris a los lados: sin él, el generador de PDF dibuja ahí una línea negra fina */
+                .gr-card-body td.gr-card-main { border-left: 0.4mm solid #CBD2DB; }
+                .gr-card-body td.gr-card-side { width: 66mm; text-align: center;
+                    border-left: 0.4mm solid #CBD2DB; border-right: 0.4mm solid #CBD2DB; }
+                .gr-card-type { font-size: 10pt; font-weight: bold; letter-spacing: 2pt; text-transform: uppercase; color: #6B7684; }
+                .gr-card-title { font-size: 27pt; font-weight: bold; line-height: 1.15; margin: 3mm 0 6mm 0; }
+                .gr-card-owner { font-size: 15pt; }
+                .gr-card-date { font-size: 12.5pt; color: #3A4452; margin-top: 1.5mm; }
+                .gr-card-message { font-size: 11.5pt; font-style: italic; color: #3A4452; margin-top: 8mm; }
+                .gr-card-qr { width: 50mm; height: 50mm; }
+                .gr-card-code { font-family: monospace; font-size: 21pt; font-weight: bold; letter-spacing: 1pt; margin-top: 3mm; }
+                .gr-card-hint { font-size: 9.5pt; color: #6B7684; margin-top: 1mm; }
+                .gr-card-foot { border-top: 0.4mm solid #CBD2DB; padding: 4mm 7mm 0 7mm; font-size: 9.5pt; color: #6B7684; }
+            </style>
+            <t t-foreach="docs" t-as="registry">
+                <!-- Cada tarjeta empieza en hoja nueva, salvo la primera -->
+                <div class="page gr-card"
+                     t-att-style="None if registry_first else 'page-break-before: always;'">
+                    <table class="gr-card-band">
+                        <tr>
+                            <td class="gr-card-store">
+                                <img t-if="registry.company_id.logo"
+                                     t-att-src="image_data_uri(registry.company_id.logo)" alt="Logo"/>
+                                <span t-else="" t-field="registry.company_id.name"/>
+                            </td>
+                            <td class="gr-card-kicker">LISTA DE REGALOS</td>
+                        </tr>
+                    </table>
+                    <table class="gr-card-body">
+                        <tr>
+                            <td class="gr-card-main">
+                                <div class="gr-card-type" t-field="registry.event_type_id.name"/>
+                                <div class="gr-card-title" t-field="registry.title"/>
+                                <div class="gr-card-owner" t-field="registry.partner_id.name"/>
+                                <div class="gr-card-date" t-out="registry._get_event_date_label()"/>
+                                <div t-if="registry.message" class="gr-card-message">
+                                    «<t t-out="registry.message"/>»
+                                </div>
+                            </td>
+                            <td class="gr-card-side">
+                                <img class="gr-card-qr" t-att-src="image_data_uri(registry._get_card_qr())"
+                                     alt="Código QR de la lista"/>
+                                <div class="gr-card-code" t-field="registry.name"/>
+                                <div class="gr-card-hint">Muestra este código en caja</div>
+                            </td>
+                        </tr>
+                    </table>
+                    <div class="gr-card-foot">
+                        <span t-field="registry.company_id.name"/>
+                        <t t-if="registry.company_id.phone"> · <span t-field="registry.company_id.phone"/></t>
+                        <t t-if="registry.company_id.website"> · <span t-field="registry.company_id.website"/></t>
+                    </div>
+                </div>
+            </t>
+        </t>
+    </template>
+</odoo>

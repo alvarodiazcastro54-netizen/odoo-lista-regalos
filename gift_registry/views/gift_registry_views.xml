@@ -27,6 +27,8 @@
                 <header>
                     <button name="action_activate" type="object" string="Activar"
                             class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="%(gift_registry.action_report_gift_registry_card)d" type="action"
+                            string="Imprimir tarjeta" invisible="state != 'active'"/>
                     <button name="action_close" type="object" string="Cerrar"
                             invisible="state != 'active'"/>
                     <button name="action_cancel" type="object" string="Cancelar"

@@ -1,10 +1,11 @@
+import base64
 import logging
 from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
 from odoo.fields import Command
-from odoo.tools import float_compare, float_round
+from odoo.tools import float_compare, float_round, format_date
 
 _logger = logging.getLogger(__name__)
 
@@ -152,6 +153,21 @@ class GiftRegistry(models.Model):
         if vals.get("consent_data"):
             vals = {**vals, **self._consent_vals()}
         return super().write(vals)
+
+    # --- Tarjeta imprimible ---------------------------------------------------
+    def _get_event_date_label(self):
+        """Fecha del evento en palabras: "sábado, 17 de octubre de 2026"."""
+        self.ensure_one()
+        return format_date(self.env, self.event_date, date_format="EEEE, d 'de' MMMM 'de' y")
+
+    def _get_card_qr(self):
+        """QR (PNG en base64) con el código de la lista.
+
+        Se incrusta en el reporte: así el PDF no necesita pedir la imagen al servidor.
+        """
+        self.ensure_one()
+        png = self.env["ir.actions.report"].barcode("QR", self.name, width=300, height=300)
+        return base64.b64encode(png)
 
     # --- Acciones de estado -------------------------------------------------
     def action_activate(self):
