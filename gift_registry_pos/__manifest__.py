@@ -14,6 +14,10 @@
         "point_of_sale._assets_pos": [
             "gift_registry_pos/static/src/**/*",
         ],
+        # Tours: solo se cargan al ejecutar pruebas de pantalla
+        "web.assets_tests": [
+            "gift_registry_pos/static/tests/tours/**/*",
+        ],
     },
     "auto_install": True,
     "installable": True,
