@@ -1,0 +1,23 @@
+{
+    "name": "Lista de regalos",
+    "summary": "Listas de regalos por evento conectadas a productos, stock y clientes",
+    "version": "19.0.1.0.0",
+    "category": "Sales/Point of Sale",
+    "license": "LGPL-3",
+    "author": "Su empresa",
+    "depends": ["mail", "stock"],
+    "data": [
+        "security/gift_registry_security.xml",
+        "security/ir.model.access.csv",
+        "data/ir_sequence_data.xml",
+        "data/gift_registry_event_type_data.xml",
+        "data/mail_template_data.xml",
+        "data/ir_cron_data.xml",
+        "views/gift_registry_views.xml",
+        "views/gift_registry_line_views.xml",
+        "report/gift_registry_report_views.xml",
+        "views/gift_registry_menus.xml",
+    ],
+    "application": True,
+    "installable": True,
+}

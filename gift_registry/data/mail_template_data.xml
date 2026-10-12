@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="mail_template_gift_received" model="mail.template">
+        <field name="name">Lista de regalos: regalo recibido</field>
+        <field name="model_id" ref="model_gift_registry_line"/>
+        <field name="subject">¡Te regalaron {{ object.product_id.name }}!</field>
+        <field name="email_to">{{ object.registry_id.partner_id.email }}</field>
+        <field name="lang">{{ object.registry_id.partner_id.lang }}</field>
+        <field name="body_html" type="html">
+<div>
+    <p>Hola <t t-out="object.registry_id.partner_id.name"/>:</p>
+    <p>Alguien eligió <b t-out="object.product_id.display_name"/> de tu lista
+       <t t-out="object.registry_id.title"/> (<t t-out="object.registry_id.name"/>).</p>
+    <p>Llevas <t t-out="int(object.registry_id.progress)"/> % de tu lista cubierta.</p>
+</div>
+        </field>
+    </record>
+    <record id="mail_template_registry_activated" model="mail.template">
+        <field name="name">Lista de regalos: lista activada</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="subject">Tu lista {{ object.name }} está lista para compartir</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html" type="html">
+<div>
+    <p>Hola <t t-out="object.partner_id.name"/>, tu lista <b t-out="object.title"/> ya está activa.</p>
+    <p>Comparte el código <b t-out="object.name"/> con tus invitados.</p>
+</div>
+        </field>
+    </record>
+    <record id="mail_template_registry_reminder" model="mail.template">
+        <field name="name">Lista de regalos: recordatorio antes del evento</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="subject">Falta una semana: comparte tu lista {{ object.name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="body_html" type="html">
+<div>
+    <p>Tu evento es el <t t-out="object.event_date"/>. Ya tienes
+       <t t-out="int(object.progress)"/> % de tu lista cubierta.</p>
+</div>
+        </field>
+    </record>
+</odoo>

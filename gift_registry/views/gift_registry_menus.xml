@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_gift_registry_root" name="Listas de regalos"
+              groups="group_gift_registry_user" sequence="45"/>
+    <menuitem id="menu_gift_registry" parent="menu_gift_registry_root"
+              action="gift_registry_action" sequence="10"/>
+    <menuitem id="menu_gift_registry_reporting" name="Reportes"
+              parent="menu_gift_registry_root" sequence="80"
+              groups="group_gift_registry_manager"/>
+    <menuitem id="menu_gift_registry_report" parent="menu_gift_registry_reporting"
+              action="gift_registry_report_action" sequence="10"/>
+    <menuitem id="menu_gift_registry_line_report" parent="menu_gift_registry_reporting"
+              action="gift_registry_line_action" sequence="20"/>
+    <menuitem id="menu_gift_registry_config" name="Configuración"
+              parent="menu_gift_registry_root" sequence="90"
+              groups="group_gift_registry_manager"/>
+</odoo>

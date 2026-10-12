@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Botón en la pantalla de productos -->
+    <t t-name="gift_registry_pos.ControlButtons" t-inherit="point_of_sale.ControlButtons" t-inherit-mode="extension">
+        <xpath expr="//SelectPartnerButton" position="after">
+            <button t-if="pos.config.gift_registry_enabled and !props.showRemainingButtons"
+                    class="btn btn-secondary btn-lg" t-on-click="() => this.onClickGiftRegistry()">
+                <i class="fa fa-gift me-1"/> Lista de regalos
+            </button>
+        </xpath>
+    </t>
+
+    <!-- Leyenda en la línea del ticket, en pantalla y en el recibo (también el básico) -->
+    <t t-name="gift_registry_pos.Orderline" t-inherit="point_of_sale.Orderline" t-inherit-mode="extension">
+        <xpath expr="//ul[hasclass('info-list')]" position="inside">
+            <li t-if="line.gift_registry_line_id" class="gift-registry-info">
+                <i class="fa fa-gift me-1"/>
+                Regalo para <t t-esc="line.gift_registry_line_id.registry_id.partner_name"/>
+                · <t t-esc="line.gift_registry_line_id.registry_id.name"/>
+            </li>
+        </xpath>
+    </t>
+</templates>

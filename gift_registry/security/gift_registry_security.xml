@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_groups_privilege_gift_registry" model="res.groups.privilege">
+        <field name="name">Listas de regalos</field>
+        <field name="sequence">22</field>
+        <field name="category_id" ref="base.module_category_sales"/>
+    </record>
+    <record id="group_gift_registry_user" model="res.groups">
+        <field name="name">Vendedor</field>
+        <field name="sequence">10</field>
+        <field name="privilege_id" ref="res_groups_privilege_gift_registry"/>
+    </record>
+    <record id="group_gift_registry_manager" model="res.groups">
+        <field name="name">Administrador</field>
+        <field name="sequence">20</field>
+        <field name="privilege_id" ref="res_groups_privilege_gift_registry"/>
+        <field name="implied_ids" eval="[(4, ref('group_gift_registry_user'))]"/>
+        <field name="user_ids" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+    </record>
+
+    <!-- Multiempresa: cada usuario ve solo las listas de sus empresas -->
+    <record id="rule_gift_registry_company" model="ir.rule">
+        <field name="name">Listas de regalos: multiempresa</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <record id="rule_gift_registry_line_company" model="ir.rule">
+        <field name="name">Líneas de lista: multiempresa</field>
+        <field name="model_id" ref="model_gift_registry_line"/>
+        <field name="domain_force">[('company_id', 'in', company_ids)]</field>
+    </record>
+    <!-- El vendedor no ve listas canceladas -->
+    <record id="rule_gift_registry_user_no_cancel" model="ir.rule">
+        <field name="name">Listas de regalos: vendedor sin canceladas</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="groups" eval="[(4, ref('group_gift_registry_user'))]"/>
+        <field name="domain_force">[('state', '!=', 'cancel')]</field>
+    </record>
+    <record id="rule_gift_registry_manager_all" model="ir.rule">
+        <field name="name">Listas de regalos: administrador ve todo</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="groups" eval="[(4, ref('group_gift_registry_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

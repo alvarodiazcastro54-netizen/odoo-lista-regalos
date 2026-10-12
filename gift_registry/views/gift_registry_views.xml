@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="gift_registry_view_list" model="ir.ui.view">
+        <field name="name">gift.registry.list</field>
+        <field name="model">gift.registry</field>
+        <field name="arch" type="xml">
+            <list decoration-muted="state in ('closed', 'cancel')" decoration-danger="has_exceeded_lines">
+                <field name="name"/>
+                <field name="title"/>
+                <field name="partner_id"/>
+                <field name="event_type_id"/>
+                <field name="event_date"/>
+                <field name="progress" widget="progressbar"/>
+                <field name="has_exceeded_lines" column_invisible="1"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'" decoration-info="state == 'draft'"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="gift_registry_view_form" model="ir.ui.view">
+        <field name="name">gift.registry.form</field>
+        <field name="model">gift.registry</field>
+        <field name="arch" type="xml">
+            <form>
+                <header>
+                    <button name="action_activate" type="object" string="Activar"
+                            class="btn-primary" invisible="state != 'draft'"/>
+                    <button name="action_close" type="object" string="Cerrar"
+                            invisible="state != 'active'"/>
+                    <button name="action_cancel" type="object" string="Cancelar"
+                            invisible="state in ('closed', 'cancel')"
+                            groups="gift_registry.group_gift_registry_manager"/>
+                    <button name="action_draft" type="object" string="Volver a borrador"
+                            invisible="state != 'cancel'"
+                            groups="gift_registry.group_gift_registry_manager"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,active,closed"/>
+                </header>
+                <sheet>
+                    <div class="oe_title"><h1><field name="name" readonly="1"/></h1>
+                        <h2><field name="title" placeholder="Cumpleaños de Ana"/></h2></div>
+                    <group>
+                        <group>
+                            <field name="partner_id" readonly="state != 'draft'"/>
+                            <field name="event_type_id"/>
+                            <field name="event_date"/>
+                            <field name="close_date"/>
+                        </group>
+                        <group>
+                            <field name="privacy"/>
+                            <field name="delivery_mode"/>
+                            <field name="user_id"/>
+                            <field name="progress" widget="progressbar"/>
+                            <field name="company_id" groups="base.group_multi_company"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Productos" name="lines">
+                            <field name="line_ids" readonly="state in ('closed', 'cancel')">
+                                <list editable="bottom" decoration-danger="status == 'exceeded'"
+                                      decoration-success="status == 'done'">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="product_id"/>
+                                    <field name="qty_wanted"/>
+                                    <field name="qty_gifted"/>
+                                    <field name="qty_pending"/>
+                                    <field name="qty_available"/>
+                                    <field name="priority" widget="priority"/>
+                                    <field name="accept_other_variant"/>
+                                    <field name="note"/>
+                                    <field name="status" widget="badge"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Mensaje" name="message">
+                            <field name="message" placeholder="Mensaje para los invitados"/>
+                        </page>
+                        <page string="Consentimiento" name="consent">
+                            <group>
+                                <field name="consent_data"/>
+                                <field name="consent_marketing"/>
+                                <field name="consent_date"/>
+                                <field name="consent_user_id"/>
+                                <field name="consent_text_version"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="gift_registry_view_search" model="ir.ui.view">
+        <field name="name">gift.registry.search</field>
+        <field name="model">gift.registry</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name" string="Lista" filter_domain="['|', '|', ('name', 'ilike', self), ('title', 'ilike', self), ('partner_id', 'child_of', raw_value)]"/>
+                <field name="partner_id"/>
+                <filter name="active_lists" string="Activas" domain="[('state', '=', 'active')]"/>
+                <filter name="next_30" string="Evento en 30 días"
+                        domain="[('event_date', '&gt;=', context_today().strftime('%Y-%m-%d')), ('event_date', '&lt;=', (context_today() + relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <filter name="exceeded" string="Con excedidos" domain="[('has_exceeded_lines', '=', True)]"/>
+                <separator/>
+                <filter name="group_event_type" string="Tipo de evento" context="{'group_by': 'event_type_id'}"/>
+                <filter name="group_event_month" string="Mes del evento" context="{'group_by': 'event_date:month'}"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="gift_registry_view_calendar" model="ir.ui.view">
+        <field name="name">gift.registry.calendar</field>
+        <field name="model">gift.registry</field>
+        <field name="arch" type="xml">
+            <calendar date_start="event_date" color="event_type_id" mode="month" quick_create="0">
+                <field name="title"/>
+                <field name="partner_id"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="gift_registry_action" model="ir.actions.act_window">
+        <field name="name">Listas de regalos</field>
+        <field name="res_model">gift.registry</field>
+        <field name="view_mode">list,form,calendar</field>
+        <field name="context">{'search_default_active_lists': 1}</field>
+    </record>
+</odoo>

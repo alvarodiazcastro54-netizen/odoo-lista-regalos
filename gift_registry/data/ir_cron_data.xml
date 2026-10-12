@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="ir_cron_gift_registry_close" model="ir.cron">
+        <field name="name">Listas de regalos: cerrar vencidas</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_close_expired()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+    <record id="ir_cron_gift_registry_reminder" model="ir.cron">
+        <field name="name">Listas de regalos: recordatorio 7 días antes</field>
+        <field name="model_id" ref="model_gift_registry"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_event_reminder(days_before=7)</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>

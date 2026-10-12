@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="event_type_birthday" model="gift.registry.event.type"><field name="name">Cumpleaños</field><field name="sequence">1</field></record>
+    <record id="event_type_wedding" model="gift.registry.event.type"><field name="name">Boda</field><field name="sequence">2</field></record>
+    <record id="event_type_baby_shower" model="gift.registry.event.type"><field name="name">Baby shower</field><field name="sequence">3</field></record>
+    <record id="event_type_anniversary" model="gift.registry.event.type"><field name="name">Aniversario</field><field name="sequence">4</field></record>
+    <record id="event_type_other" model="gift.registry.event.type"><field name="name">Otro</field><field name="sequence">9</field></record>
+</odoo>

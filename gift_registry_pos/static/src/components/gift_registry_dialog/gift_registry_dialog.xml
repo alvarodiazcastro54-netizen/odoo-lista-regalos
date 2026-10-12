@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="gift_registry_pos.GiftRegistryDialog">
+        <Dialog title.translate="Lista de regalos" size="'lg'">
+            <div t-if="isOffline" class="alert alert-warning py-2">
+                Sin conexión: se muestran las listas cargadas al abrir la caja.
+            </div>
+            <div class="input-group mb-3">
+                <input class="form-control form-control-lg" t-model="state.query"
+                       placeholder="Nombre, DNI o código (LR-00012)"
+                       t-on-keyup="(ev) => ev.key === 'Enter' and this.search()"/>
+                <button class="btn btn-primary" t-on-click="search"
+                        t-att-disabled="state.searching">Buscar</button>
+            </div>
+            <t t-if="!state.selected">
+                <div t-foreach="state.results" t-as="registry" t-key="registry.id"
+                     class="d-flex justify-content-between border rounded p-2 mb-2"
+                     t-on-click="() => this.state.selected = registry">
+                    <span><b t-esc="registry.partner_name"/> · <t t-esc="registry.title"/></span>
+                    <span><t t-esc="registry.event_type_name"/> · <t t-esc="registry.event_date"/> · <t t-esc="registry.name"/></span>
+                </div>
+            </t>
+            <t t-else="">
+                <p t-if="state.selected.message" class="fst-italic" t-esc="state.selected.message"/>
+                <table class="table table-sm align-middle">
+                    <thead><tr><th>Producto</th><th>Pendiente</th><th>Stock</th><th/></tr></thead>
+                    <tbody>
+                        <tr t-foreach="state.selected.line_ids" t-as="line" t-key="line.id"
+                            t-att-class="{'text-muted': pendingFor(line) &lt;= 0}">
+                            <td><t t-esc="line.product_id.display_name"/>
+                                <div t-if="line.note" class="small text-muted" t-esc="line.note"/></td>
+                            <td t-esc="pendingFor(line)"/>
+                            <td t-att-class="{'text-danger': line.qty_available &lt;= 0}" t-esc="line.qty_available"/>
+                            <td><button class="btn btn-secondary"
+                                        t-att-disabled="pendingFor(line) &lt;= 0 or line.qty_available &lt;= 0"
+                                        t-on-click="() => this.pick(line)">Agregar</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </t>
+            <t t-set-slot="footer">
+                <button t-if="state.selected" class="btn btn-light"
+                        t-on-click="() => this.state.selected = null">Volver</button>
+                <button class="btn btn-light" t-on-click="props.close">Cerrar</button>
+            </t>
+        </Dialog>
+    </t>
+</templates>

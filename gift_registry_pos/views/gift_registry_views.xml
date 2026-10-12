@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="gift_registry_view_form_pos" model="ir.ui.view">
+        <field name="name">gift.registry.form.pos</field>
+        <field name="model">gift.registry</field>
+        <field name="inherit_id" ref="gift_registry.gift_registry_view_form"/>
+        <field name="arch" type="xml">
+            <page name="message" position="before">
+                <page string="Ventas en caja" name="pos_sales">
+                    <field name="pos_line_ids" readonly="1">
+                        <list>
+                            <field name="order_id"/>
+                            <field name="product_id"/>
+                            <field name="qty"/>
+                            <field name="price_subtotal_incl"/>
+                            <field name="create_date"/>
+                        </list>
+                    </field>
+                </page>
+            </page>
+        </field>
+    </record>
+</odoo>

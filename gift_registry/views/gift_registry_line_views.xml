@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="gift_registry_line_view_pivot" model="ir.ui.view">
+        <field name="name">gift.registry.line.pivot</field>
+        <field name="model">gift.registry.line</field>
+        <field name="arch" type="xml">
+            <pivot string="Productos más pedidos">
+                <field name="product_id" type="row"/>
+                <field name="qty_wanted" type="measure"/>
+                <field name="qty_gifted" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    <record id="gift_registry_line_action" model="ir.actions.act_window">
+        <field name="name">Productos más pedidos</field>
+        <field name="res_model">gift.registry.line</field>
+        <field name="view_mode">pivot,list</field>
+    </record>
+</odoo>

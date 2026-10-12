@@ -1,0 +1,8 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_gift_registry_user,gift.registry.user,model_gift_registry,group_gift_registry_user,1,1,1,0
+access_gift_registry_manager,gift.registry.manager,model_gift_registry,group_gift_registry_manager,1,1,1,1
+access_gift_registry_line_user,gift.registry.line.user,model_gift_registry_line,group_gift_registry_user,1,1,1,1
+access_gift_registry_line_manager,gift.registry.line.manager,model_gift_registry_line,group_gift_registry_manager,1,1,1,1
+access_gift_registry_event_type_user,gift.registry.event.type.user,model_gift_registry_event_type,group_gift_registry_user,1,0,0,0
+access_gift_registry_event_type_manager,gift.registry.event.type.manager,model_gift_registry_event_type,group_gift_registry_manager,1,1,1,1
+access_gift_registry_report_manager,gift.registry.report.manager,model_gift_registry_report,group_gift_registry_manager,1,0,0,0
