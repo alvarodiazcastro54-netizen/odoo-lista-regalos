@@ -1,9 +1,9 @@
 {
     "name": "Lista de regalos en el Punto de Venta",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Sales/Point of Sale",
     "license": "LGPL-3",
-    "author": "Su empresa",
+    "author": "Macromec",
     "depends": ["gift_registry", "point_of_sale"],
     "data": [
         "security/gift_registry_pos_security.xml",

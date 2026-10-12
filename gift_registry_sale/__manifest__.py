@@ -1,9 +1,9 @@
 {
     "name": "Lista de regalos en ventas y eCommerce",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Sales/Sales",
     "license": "LGPL-3",
-    "author": "Su empresa",
+    "author": "Macromec",
     "depends": ["gift_registry", "sale_stock"],
     "data": [],
     "auto_install": True,

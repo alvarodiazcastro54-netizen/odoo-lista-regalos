@@ -1,10 +1,10 @@
 {
     "name": "Lista de regalos",
     "summary": "Listas de regalos por evento conectadas a productos, stock y clientes",
-    "version": "19.0.1.0.0",
+    "version": "19.0.1.1.0",
     "category": "Sales/Point of Sale",
     "license": "LGPL-3",
-    "author": "Su empresa",
+    "author": "Macromec",
     "depends": ["mail", "stock"],
     "data": [
         "security/gift_registry_security.xml",
