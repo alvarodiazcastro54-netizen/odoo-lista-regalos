@@ -1,47 +1,124 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
+    <!-- Avance de una lista: "3 de 7 regalos cubiertos" + barra -->
+    <t t-name="gift_registry_pos.GiftRegistryProgress">
+        <div class="gr-progress">
+            <div class="gr-progress-label small">
+                <b><t t-esc="formatQty(progress.covered)"/> de <t t-esc="formatQty(progress.wanted)"/></b>
+                regalos cubiertos
+            </div>
+            <div t-attf-class="progress gr-progress-bar {{ progress.segments ? 'gr-progress-bar--segmented' : '' }} {{ progress.complete ? 'gr-progress-bar--complete' : '' }}"
+                 t-attf-style="--gr-segments: {{ progress.segments || 1 }}"
+                 role="progressbar" aria-valuemin="0" aria-valuemax="100" t-att-aria-valuenow="progress.percent">
+                <div t-attf-class="progress-bar {{ progress.complete ? 'bg-success' : '' }}"
+                     t-attf-style="width: {{ progress.percent }}%"/>
+            </div>
+        </div>
+    </t>
+
     <t t-name="gift_registry_pos.GiftRegistryDialog">
-        <Dialog title.translate="Lista de regalos" size="'lg'">
+        <Dialog title.translate="Lista de regalos" size="'lg'" contentClass="'o_gift_registry_dialog'">
             <div t-if="isOffline" class="alert alert-warning py-2">
                 Sin conexión: se muestran las listas cargadas al abrir la caja.
             </div>
-            <div class="input-group mb-3">
+            <div class="gr-search input-group input-group-lg mb-3">
                 <input class="form-control form-control-lg" t-model="state.query"
                        placeholder="Nombre, DNI o código (LR-00012)"
                        t-on-keyup="(ev) => ev.key === 'Enter' and this.search()"/>
-                <button class="btn btn-primary" t-on-click="search"
+                <button class="btn btn-primary px-4" t-on-click="search"
                         t-att-disabled="state.searching">Buscar</button>
             </div>
+
+            <!-- Resultados de la búsqueda -->
             <t t-if="!state.selected">
-                <div t-foreach="state.results" t-as="registry" t-key="registry.id"
-                     class="d-flex justify-content-between border rounded p-2 mb-2"
-                     t-on-click="() => this.state.selected = registry">
-                    <span><b t-esc="registry.partner_name"/> · <t t-esc="registry.title"/></span>
-                    <span><t t-esc="registry.event_type_name"/> · <t t-esc="registry.event_date"/> · <t t-esc="registry.name"/></span>
-                </div>
+                <p t-if="state.searched and !state.searching and !state.results.length"
+                   class="gr-empty text-muted text-center py-4 mb-0">
+                    No se encontró ninguna lista activa con ese dato.
+                </p>
+                <button t-foreach="state.results" t-as="registry" t-key="registry.id" type="button"
+                        class="gr-result btn btn-light border w-100 d-flex align-items-center gap-3 p-3 mb-2 text-start"
+                        t-on-click="() => this.state.selected = registry">
+                    <t t-set="progress" t-value="progressOf(registry)"/>
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="gr-title fs-4 fw-bolder text-truncate" t-esc="registry.title"/>
+                        <div class="gr-meta text-muted text-truncate">
+                            <t t-esc="registry.partner_name"/> · <t t-esc="registry.event_type_name"/>
+                            · <t t-esc="eventDateLabel(registry)"/>
+                        </div>
+                    </div>
+                    <div class="gr-side flex-shrink-0 text-end">
+                        <div class="gr-code" t-esc="registry.name"/>
+                        <t t-call="gift_registry_pos.GiftRegistryProgress"/>
+                    </div>
+                </button>
             </t>
+
+            <!-- Productos de la lista elegida -->
             <t t-else="">
-                <p t-if="state.selected.message" class="fst-italic" t-esc="state.selected.message"/>
-                <table class="table table-sm align-middle">
-                    <thead><tr><th>Producto</th><th>Pendiente</th><th>Stock</th><th/></tr></thead>
-                    <tbody>
-                        <tr t-foreach="state.selected.line_ids" t-as="line" t-key="line.id"
-                            t-att-class="{'text-muted': pendingFor(line) &lt;= 0}">
-                            <td><t t-esc="line.product_id.display_name"/>
-                                <div t-if="line.note" class="small text-muted" t-esc="line.note"/></td>
-                            <td t-esc="pendingFor(line)"/>
-                            <td t-att-class="{'text-danger': line.qty_available &lt;= 0}" t-esc="line.qty_available"/>
-                            <td><button class="btn btn-secondary"
-                                        t-att-disabled="pendingFor(line) &lt;= 0 or line.qty_available &lt;= 0"
-                                        t-on-click="() => this.pick(line)">Agregar</button></td>
-                        </tr>
-                    </tbody>
-                </table>
+                <t t-set="registry" t-value="state.selected"/>
+                <t t-set="progress" t-value="progressOf(registry)"/>
+                <div class="gr-head d-flex align-items-center gap-3 p-3 mb-2 border rounded">
+                    <div class="flex-grow-1 overflow-hidden">
+                        <div class="gr-code" t-esc="registry.name"/>
+                        <div class="gr-title fs-3 fw-bolder text-truncate" t-esc="registry.title"/>
+                        <div class="gr-meta text-muted">
+                            <t t-esc="registry.partner_name"/> · <t t-esc="registry.event_type_name"/>
+                            · <t t-esc="eventDateLabel(registry)"/>
+                        </div>
+                    </div>
+                    <div class="gr-side flex-shrink-0 text-end">
+                        <t t-call="gift_registry_pos.GiftRegistryProgress"/>
+                    </div>
+                </div>
+                <p t-if="registry.message" class="gr-message fst-italic mb-2" t-esc="registry.message"/>
+                <ul class="gr-lines list-unstyled mb-0">
+                    <li t-foreach="sortedLines(registry)" t-as="line" t-key="line.id"
+                        t-attf-class="gr-line gr-line--{{ lineState(line) }} d-flex align-items-center gap-3 py-2 border-top">
+                        <t t-set="lineStatus" t-value="lineState(line)"/>
+                        <img t-if="imageUrl(line)" class="gr-photo flex-shrink-0 rounded border bg-white"
+                             t-att-src="imageUrl(line)" alt="" loading="lazy"/>
+                        <div t-else="" class="gr-photo flex-shrink-0 rounded border"/>
+                        <div class="flex-grow-1 overflow-hidden">
+                            <div class="gr-product fw-bolder" t-esc="productName(line)"/>
+                            <div t-if="line.note" class="gr-note small text-muted" t-esc="line.note"/>
+                            <div class="gr-stock small">
+                                <span t-if="lineStatus === 'out'" class="text-danger">Sin stock en esta tienda</span>
+                                <span t-else="" class="text-muted">Stock: <t t-esc="formatQty(line.qty_available)"/></span>
+                                <span t-if="qtyInCurrentOrder(line)" class="text-muted">
+                                    · <t t-esc="formatQty(qtyInCurrentOrder(line))"/> en este ticket
+                                </span>
+                            </div>
+                        </div>
+                        <div class="gr-qty flex-shrink-0 text-center">
+                            <t t-if="lineStatus === 'done'">
+                                <div class="gr-qty-done fw-bolder text-success">
+                                    <i class="fa fa-check me-1"/><t t-if="line.qty_pending &lt;= 0">Completo</t><t t-else="">En el ticket</t>
+                                </div>
+                                <div class="small text-muted">
+                                    <t t-esc="formatQty(line.qty_gifted)"/> de <t t-esc="formatQty(line.qty_wanted)"/>
+                                </div>
+                            </t>
+                            <t t-else="">
+                                <div class="gr-qty-number fs-2 fw-bolder lh-1" t-esc="formatQty(pendingFor(line))"/>
+                                <div class="small text-muted">
+                                    <t t-if="pendingFor(line) === 1">falta</t><t t-else="">faltan</t>
+                                    de <t t-esc="formatQty(line.qty_wanted)"/>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="gr-action flex-shrink-0 text-center">
+                            <button t-if="lineStatus === 'pending'" class="gr-add btn btn-primary btn-lg"
+                                    t-on-click="() => this.pick(line)">Agregar</button>
+                            <span t-elif="lineStatus === 'out'" class="gr-out badge text-bg-danger">Agotado</span>
+                        </div>
+                    </li>
+                </ul>
             </t>
+
             <t t-set-slot="footer">
-                <button t-if="state.selected" class="btn btn-light"
+                <button t-if="state.selected" class="btn btn-secondary btn-lg"
                         t-on-click="() => this.state.selected = null">Volver</button>
-                <button class="btn btn-light" t-on-click="props.close">Cerrar</button>
+                <button class="btn btn-secondary btn-lg" t-on-click="props.close">Cerrar</button>
             </t>
         </Dialog>
     </t>

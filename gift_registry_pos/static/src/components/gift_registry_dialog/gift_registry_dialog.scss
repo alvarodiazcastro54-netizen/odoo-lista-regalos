@@ -1,0 +1,102 @@
+// Estructura del diálogo de Lista de regalos. Aquí solo van tamaños y disposición,
+// con los colores estándar de Odoo; la apariencia de marca la pone el tema.
+$gr-touch-target: 48px; // alto mínimo cómodo para tocar con el dedo
+
+.o_gift_registry_dialog {
+    .gr-search {
+        .form-control, .btn {
+            min-height: $gr-touch-target;
+        }
+    }
+
+    .modal-footer .btn {
+        min-width: 6rem;
+        min-height: $gr-touch-target;
+    }
+
+    .gr-code {
+        font-size: $font-size-sm;
+        letter-spacing: .08em;
+        color: $text-muted;
+    }
+
+    .gr-result {
+        min-height: 4.5rem;
+    }
+
+    .gr-progress {
+        min-width: 12rem;
+    }
+
+    .gr-progress-bar {
+        height: .75rem;
+        margin-top: map-get($spacers, 1);
+    }
+
+    .gr-photo {
+        width: 64px;
+        height: 64px;
+        object-fit: cover;
+    }
+
+    .gr-qty {
+        min-width: 6rem;
+    }
+
+    .gr-action {
+        min-width: 8.5rem;
+    }
+
+    .gr-add {
+        min-width: 8.5rem;
+        min-height: $gr-touch-target;
+    }
+
+    .gr-out {
+        padding: map-get($spacers, 2) map-get($spacers, 3);
+        font-size: $font-size-base;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+    }
+
+    // Pendientes destacados: lo que el cajero puede vender ahora
+    .gr-line--pending {
+        margin: 0 (-$modal-inner-padding);
+        padding-left: $modal-inner-padding;
+        padding-right: $modal-inner-padding;
+        background-color: rgba($primary, .06);
+        box-shadow: inset 4px 0 0 $primary;
+
+        .gr-qty-number {
+            color: $primary;
+        }
+    }
+
+    .gr-line--out .gr-photo {
+        filter: grayscale(1);
+        opacity: .6;
+    }
+
+    .gr-line--done {
+        .gr-photo, .gr-product, .gr-note, .gr-stock {
+            opacity: .55;
+        }
+    }
+
+    // Pantallas estrechas: la cantidad y el botón bajan a una segunda fila
+    @include media-breakpoint-down(md) {
+        .gr-result, .gr-head, .gr-line {
+            flex-wrap: wrap;
+        }
+
+        .gr-side {
+            flex-basis: 100%;
+            text-align: start !important;
+        }
+
+        .gr-action, .gr-add {
+            min-width: 0;
+            flex-grow: 1;
+        }
+    }
+}
