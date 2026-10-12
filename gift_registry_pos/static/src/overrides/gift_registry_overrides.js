@@ -6,10 +6,11 @@ import { GiftRegistryDialog } from "../components/gift_registry_dialog/gift_regi
 
 patch(ControlButtons.prototype, {
     async onClickGiftRegistry() {
-        const registryLine = await makeAwaitable(this.dialog, GiftRegistryDialog, {});
-        if (!registryLine) {
+        const picked = await makeAwaitable(this.dialog, GiftRegistryDialog, {});
+        if (!picked) {
             return;
         }
+        const { registryLine, message } = picked;
         const product = registryLine.product_id;
         await this.pos.addLineToCurrentOrder(
             {
@@ -17,6 +18,7 @@ patch(ControlButtons.prototype, {
                 product_id: product,
                 qty: 1,
                 gift_registry_line_id: registryLine,
+                gift_message: message || false,
             },
             { merge: false } // no fusionar con una venta normal del mismo producto
         );

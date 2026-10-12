@@ -71,6 +71,13 @@
                     </div>
                 </div>
                 <p t-if="registry.message" class="gr-message fst-italic mb-2" t-esc="registry.message"/>
+                <div class="gr-dedication mb-3">
+                    <label class="form-label small text-muted mb-1" for="gr_dedication">
+                        Dedicatoria del invitado (opcional): se imprime en el ticket junto al regalo
+                    </label>
+                    <input id="gr_dedication" class="form-control" t-model="state.message"
+                           maxlength="120" placeholder="Con cariño, de la tía Rosa"/>
+                </div>
                 <ul class="gr-lines list-unstyled mb-0">
                     <li t-foreach="sortedLines(registry)" t-as="line" t-key="line.id"
                         t-attf-class="gr-line gr-line--{{ lineState(line) }} d-flex align-items-center gap-3 py-2 border-top">

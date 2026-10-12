@@ -60,6 +60,22 @@
         color: $mm-text;
     }
 
+    // --- Dedicatoria ---
+    .gr-dedication .form-control {
+        background-color: $mm-key;
+        border-color: $mm-keyline;
+        color: $mm-text;
+
+        &::placeholder {
+            color: $mm-dim;
+        }
+
+        &:focus {
+            border-color: $mm-amber;
+            box-shadow: 0 0 0 .2rem rgba($mm-amber, .22);
+        }
+    }
+
     // --- Buscador ---
     .gr-search .form-control {
         background-color: $mm-key;

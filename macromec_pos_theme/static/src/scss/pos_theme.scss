@@ -206,9 +206,13 @@ $mm-touch-lg: 56px;        // teclas y acciones principales
             color: $mm-dim;
         }
 
-        // Leyenda "Regalo para ..." de gift_registry_pos
+        // Leyenda "Regalo para ..." y dedicatoria del invitado, de gift_registry_pos
         .gift-registry-info {
             color: $mm-cyan;
+        }
+
+        .gift-registry-message {
+            color: $mm-text;
         }
     }
 

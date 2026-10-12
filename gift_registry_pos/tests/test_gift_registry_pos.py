@@ -33,10 +33,11 @@ class TestGiftRegistryPos(TestPoSCommon):
             groups="base.group_user,gift_registry.group_gift_registry_manager",
             company_id=company.id, company_ids=[(6, 0, company.ids)])
 
-    def _sell(self, qty=1):
+    def _sell(self, qty=1, **line_values):
         order_data = self.create_ui_order_data([{
             "product": self.product, "quantity": qty,
             "gift_registry_line_id": self.reg_line.id,
+            **line_values,
         }])
         result = self.env["pos.order"].sync_from_ui([order_data])
         return self.env["pos.order"].browse(result["pos.order"][0]["id"])
@@ -153,3 +154,16 @@ class TestGiftRegistryPos(TestPoSCommon):
         self._exceeded_notices().unlink()
         self._sell(1)
         self.assertEqual(len(self._exceeded_notices()), len(managers))
+
+    def test_06_guest_dedication(self):
+        """La dedicatoria del invitado viaja con la venta y queda en la lista."""
+        self.assertIn(
+            "gift_message", self.env["pos.order.line"]._load_pos_data_fields(self.config))
+        self.open_new_session()
+        order = self._sell(1, gift_message="Con cariño, de la tía Rosa")
+        self.assertEqual(order.lines.gift_message, "Con cariño, de la tía Rosa")
+        self.assertEqual(self.gift_list.pos_line_ids.gift_message, "Con cariño, de la tía Rosa")
+
+        # Sin dedicatoria el campo queda vacío; una demasiado larga se recorta a 120
+        self.assertFalse(self._sell(1).lines.gift_message)
+        self.assertEqual(len(self._sell(1, gift_message="x" * 300).lines.gift_message), 120)

@@ -14,6 +14,10 @@ $gr-touch-target: 48px; // alto mínimo cómodo para tocar con el dedo
         min-height: $gr-touch-target;
     }
 
+    .gr-dedication .form-control {
+        min-height: $gr-touch-target;
+    }
+
     .gr-code {
         font-size: $font-size-sm;
         letter-spacing: .08em;

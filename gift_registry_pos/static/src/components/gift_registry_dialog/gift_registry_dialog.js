@@ -12,7 +12,14 @@ export class GiftRegistryDialog extends Component {
         this.pos = usePos();
         this.state = useState({
             query: "", results: [], selected: null, searching: false, searched: false,
+            // Si el invitado ya lleva un regalo con dedicatoria en este ticket, se propone la misma
+            message: this.previousMessage(),
         });
+    }
+
+    previousMessage() {
+        const lines = this.pos.getOrder()?.lines || [];
+        return lines.find((l) => l.gift_registry_line_id && l.gift_message)?.gift_message || "";
     }
 
     get isOffline() {
@@ -141,7 +148,7 @@ export class GiftRegistryDialog extends Component {
             this.pos.notification.add(_t("Este regalo ya fue cubierto."), { type: "warning" });
             return;
         }
-        this.props.getPayload(registryLine);
+        this.props.getPayload({ registryLine, message: this.state.message.trim() });
         this.props.close();
     }
 }

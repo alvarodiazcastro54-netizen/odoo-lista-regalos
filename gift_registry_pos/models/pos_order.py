@@ -11,11 +11,13 @@ class PosOrderLine(models.Model):
     gift_registry_id = fields.Many2one(
         related="gift_registry_line_id.registry_id", store=True, index="btree_not_null",
     )
+    # Texto libre del invitado; se imprime bajo la leyenda "Regalo para ..."
+    gift_message = fields.Char("Dedicatoria del invitado", size=120, copy=False)
 
     @api.model
     def _load_pos_data_fields(self, config):
-        # Sin esto el campo no viaja entre la caja y el servidor
-        return super()._load_pos_data_fields(config) + ["gift_registry_line_id"]
+        # Sin esto los campos no viajan entre la caja y el servidor
+        return super()._load_pos_data_fields(config) + ["gift_registry_line_id", "gift_message"]
 
     @api.model_create_multi
     def create(self, vals_list):
