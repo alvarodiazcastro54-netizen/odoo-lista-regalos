@@ -56,6 +56,12 @@ $gr-touch-target: 48px; // alto mínimo cómodo para tocar con el dedo
         min-height: $gr-touch-target;
     }
 
+    .gr-giftcard {
+        width: 100%;
+        min-height: $gr-touch-target;
+        white-space: nowrap;
+    }
+
     .gr-out {
         padding: map-get($spacers, 2) map-get($spacers, 3);
         font-size: $font-size-base;

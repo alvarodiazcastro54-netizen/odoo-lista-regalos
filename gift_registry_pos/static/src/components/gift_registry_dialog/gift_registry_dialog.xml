@@ -89,8 +89,10 @@
                             <div class="gr-product fw-bolder" t-esc="productName(line)"/>
                             <div t-if="line.note" class="gr-note small text-muted" t-esc="line.note"/>
                             <div class="gr-stock small">
-                                <span t-if="lineStatus === 'out'" class="text-danger">Sin stock en esta tienda</span>
-                                <span t-else="" class="text-muted">Stock: <t t-esc="formatQty(line.qty_available)"/></span>
+                                <span t-if="lineStatus === 'out' and !line.product_id" class="text-danger">No se vende en esta caja</span>
+                                <span t-elif="lineStatus === 'out'" class="text-danger">Sin stock en esta tienda</span>
+                                <span t-elif="isStorable(line)" class="text-muted">Stock: <t t-esc="formatQty(line.qty_available)"/></span>
+                                <span t-else="" class="text-muted">Sin control de stock</span>
                                 <span t-if="qtyInCurrentOrder(line)" class="text-muted">
                                     · <t t-esc="formatQty(qtyInCurrentOrder(line))"/> en este ticket
                                 </span>
@@ -116,7 +118,17 @@
                         <div class="gr-action flex-shrink-0 text-center">
                             <button t-if="lineStatus === 'pending'" class="gr-add btn btn-primary btn-lg"
                                     t-on-click="() => this.pick(line)">Agregar</button>
-                            <span t-elif="lineStatus === 'out'" class="gr-out badge text-bg-danger">Agotado</span>
+                            <t t-elif="lineStatus === 'out'">
+                                <span class="gr-out badge text-bg-danger">
+                                    <t t-if="line.product_id">Agotado</t><t t-else="">No disponible</t>
+                                </span>
+                                <!-- Alternativa para el invitado: una tarjeta de regalo (no cuenta en la lista) -->
+                                <button t-if="giftCardProduct" class="gr-giftcard btn btn-secondary d-block mt-2"
+                                        title="Agrega una tarjeta de regalo al ticket. No cuenta como regalo de la lista."
+                                        t-on-click="suggestGiftCard">
+                                    <i class="fa fa-credit-card me-1"/>Tarjeta de regalo
+                                </button>
+                            </t>
                         </div>
                     </li>
                 </ul>

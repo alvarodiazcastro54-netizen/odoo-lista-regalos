@@ -178,4 +178,15 @@
         background-color: $mm-danger-on-dark !important; // text-bg-danger
         color: $mm-night !important;
     }
+
+    .gr-giftcard {
+        @include mm-dark-key;
+        --btn-border-color: #{$mm-cyan};
+        --btn-hover-border-color: #{$mm-cyan};
+    }
+
+    // Barra de desplazamiento acorde al fondo oscuro
+    .modal-body {
+        scrollbar-color: $mm-keyline $mm-panel;
+    }
 }

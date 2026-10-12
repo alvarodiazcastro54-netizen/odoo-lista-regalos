@@ -112,12 +112,38 @@ export class GiftRegistryDialog extends Component {
         };
     }
 
-    /** "pending": se puede agregar · "out": falta pero no hay stock · "done": nada pendiente. */
+    /** Solo puede agotarse lo que lleva inventario: un servicio no tiene stock. */
+    isStorable(registryLine) {
+        return Boolean(registryLine.product_id?.product_tmpl_id?.is_storable);
+    }
+
+    /** "pending": se puede agregar · "out": falta pero no se puede vender · "done": nada pendiente. */
     lineState(registryLine) {
         if (this.pendingFor(registryLine) <= 0) {
             return "done";
         }
-        return registryLine.product_id && registryLine.qty_available > 0 ? "pending" : "out";
+        if (!registryLine.product_id) {
+            return "out"; // el producto no está disponible en esta caja
+        }
+        return this.isStorable(registryLine) && registryLine.qty_available <= 0 ? "out" : "pending";
+    }
+
+    /**
+     * Producto "tarjeta de regalo" de la caja, si hay un programa de ese tipo activo.
+     * Se consulta en tiempo de ejecución: el modelo solo existe con pos_loyalty instalado.
+     */
+    get giftCardProduct() {
+        const programs = this.pos.models["loyalty.program"]?.getAll() || [];
+        const program = programs.find(
+            (p) => p.program_type === "gift_card" && p.trigger_product_ids?.length
+        );
+        return program?.trigger_product_ids[0] || null;
+    }
+
+    /** Regalo agotado: se ofrece vender una tarjeta de regalo (no cuenta en la lista). */
+    suggestGiftCard() {
+        this.props.getPayload({ giftCardProduct: this.giftCardProduct });
+        this.props.close();
     }
 
     /** Pendientes primero, luego agotados y al final los ya cubiertos. */

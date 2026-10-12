@@ -10,6 +10,16 @@ patch(ControlButtons.prototype, {
         if (!picked) {
             return;
         }
+        if (picked.giftCardProduct) {
+            // Regalo agotado: venta normal de una tarjeta de regalo, sin enlazarla a la lista.
+            // Si pos_loyalty está instalado, su flujo pide el importe o el código.
+            const card = picked.giftCardProduct;
+            await this.pos.addLineToCurrentOrder({
+                product_tmpl_id: card.product_tmpl_id,
+                product_id: card,
+            });
+            return;
+        }
         const { registryLine, message } = picked;
         const product = registryLine.product_id;
         await this.pos.addLineToCurrentOrder(
