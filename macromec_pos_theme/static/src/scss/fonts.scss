@@ -1,0 +1,46 @@
+// Fuentes incluidas en el módulo: la caja no depende de internet.
+// Licencia SIL Open Font License (ver static/fonts/OFL-*.txt).
+//
+// Los pesos van "un punto más gruesos" a propósito. Odoo pide 400 para el texto
+// normal y 500 para la negrita; Montserrat Regular se ve fina en una pantalla de
+// caja, así que se sirve Medium donde Odoo pide normal y SemiBold donde pide
+// negrita. Así no hace falta tocar ninguna regla de peso de Odoo.
+//
+// Las familias llevan nombre propio ("Macromec Sans", "Macromec Mono") porque Odoo
+// ya declara "Montserrat" y "Fira Mono" con sus pesos reales: así no se pisan.
+//
+// Las rutas son relativas a este archivo y escritas tal cual (sin variables):
+// Odoo las reescribe al empaquetar y solo así las resuelve bien.
+
+@font-face {
+    font-family: "Macromec Sans";
+    font-style: normal;
+    font-weight: 100 400;
+    font-display: swap;
+    src: url("../../fonts/Montserrat-Medium.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Macromec Sans";
+    font-style: normal;
+    font-weight: 500;
+    font-display: swap;
+    src: url("../../fonts/Montserrat-SemiBold.ttf") format("truetype");
+}
+
+@font-face {
+    font-family: "Macromec Sans";
+    font-style: normal;
+    font-weight: 600 900;
+    font-display: swap;
+    src: url("../../fonts/Montserrat-Bold.ttf") format("truetype");
+}
+
+// Cifras: todos los dígitos ocupan lo mismo y los importes quedan alineados
+@font-face {
+    font-family: "Macromec Mono";
+    font-style: normal;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("../../fonts/Fira_Mono-Medium.ttf") format("truetype");
+}

@@ -1,0 +1,331 @@
+// Macromec · tema "Mostrador" para el Punto de Venta
+//
+// Idea: lo que se está cobrando (el ticket) va sobre fondo oscuro y con las
+// cifras grandes; la zona de productos sigue clara. Los botones de acción son
+// ámbar. Solo cambian colores, letra, tamaños y bordes: no se oculta nada.
+//
+// Cómo está hecho, para mantenerlo:
+//  - Los botones de Odoo se pintan con propiedades (--btn-bg, --btn-color...);
+//    aquí se cambian esas propiedades en vez de forzar estilos.
+//  - "!important" solo aparece donde Odoo usa clases utilitarias que ya lo
+//    llevan (bg-view, bg-100, rounded-0...).
+//  - Las zonas oscuras están acotadas a la barra superior y al ticket de la
+//    pantalla de productos. El recibo impreso no se toca.
+
+// ---------------------------------------------------------------------------
+// 1. Paleta y medidas
+// ---------------------------------------------------------------------------
+$mm-night: #11151B;        // barra superior y franja del total
+$mm-panel: #1A2029;        // fondo del ticket
+$mm-key: #252D38;          // teclas sobre fondo oscuro
+$mm-key-hover: #2E3846;
+$mm-keyline: #343F4E;      // bordes sobre fondo oscuro
+$mm-row-hover: #202834;
+$mm-row-selected: #263142;
+$mm-text: #F2F4F7;         // texto sobre fondo oscuro
+$mm-dim: #9AA6B5;          // texto secundario sobre fondo oscuro
+$mm-amber: #FFB81C;        // acción principal y total
+$mm-amber-hover: #F5A800;
+$mm-amber-active: #E09A00;
+$mm-cyan: #42C8E8;         // todo lo relativo a listas de regalos
+$mm-danger-on-dark: #FF6B70;
+$mm-success-on-dark: #3DDC97;
+$mm-canvas: #E4E8EE;       // fondo de la zona de productos
+$mm-line: #CBD2DB;         // bordes sobre fondo claro
+
+$mm-font-mono: "Macromec Mono", "Fira Mono", Consolas, "Courier New", monospace;
+$mm-touch: 48px;           // alto mínimo cómodo para el dedo
+$mm-touch-lg: 56px;        // teclas y acciones principales
+
+// Teclas oscuras: se usa en la barra superior, en el ticket y en el diálogo de regalos
+@mixin mm-dark-key {
+    --btn-color: #{$mm-text};
+    --btn-bg: #{$mm-key};
+    --btn-border-color: #{$mm-keyline};
+    --btn-hover-color: #{$mm-text};
+    --btn-hover-bg: #{$mm-key-hover};
+    --btn-hover-border-color: #{$mm-keyline};
+    --btn-active-color: #{$mm-night};
+    --btn-active-bg: #{$mm-text};
+    --btn-active-border-color: #{$mm-text};
+    --btn-disabled-color: #{$mm-dim};
+    --btn-disabled-bg: #{$mm-key};
+    --btn-disabled-border-color: #{$mm-keyline};
+
+    &:disabled, &.disabled {
+        filter: none;
+        opacity: .45;
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 2. Botón de acción principal: ámbar con texto oscuro (Pago, Validar, Buscar...)
+// ---------------------------------------------------------------------------
+.btn-primary {
+    --btn-color: #{$mm-night};
+    --btn-bg: #{$mm-amber};
+    --btn-border-color: #{$mm-amber};
+    --btn-hover-color: #{$mm-night};
+    --btn-hover-bg: #{$mm-amber-hover};
+    --btn-hover-border-color: #{$mm-amber-hover};
+    --btn-active-color: #{$mm-night};
+    --btn-active-bg: #{$mm-amber-active};
+    --btn-active-border-color: #{$mm-amber-active};
+    --btn-disabled-color: #{$mm-night};
+    --btn-disabled-bg: #{$mm-amber};
+    --btn-disabled-border-color: #{$mm-amber};
+    font-weight: 700;
+}
+
+// ---------------------------------------------------------------------------
+// 3. Tamaños táctiles
+// ---------------------------------------------------------------------------
+.modal-footer .btn {
+    min-height: $mm-touch;
+}
+
+.numpad-button {
+    min-height: $mm-touch-lg;
+    font-family: $mm-font-mono;
+}
+
+.pay-order-button {
+    min-height: 72px;
+    font-size: 1.35rem;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+}
+
+// ---------------------------------------------------------------------------
+// 4. Barra superior
+// ---------------------------------------------------------------------------
+.pos .pos-topheader {
+    background-color: $mm-night !important; // bg-view
+    border-bottom-color: #000 !important;
+    color: $mm-text;
+
+    .btn-light {
+        --btn-color: #{$mm-text};
+        --btn-bg: transparent;
+        --btn-border-color: transparent;
+        --btn-hover-color: #{$mm-text};
+        --btn-hover-bg: #{$mm-key};
+        --btn-hover-border-color: transparent;
+        --btn-active-color: #{$mm-night};
+        --btn-active-bg: #{$mm-amber};
+        --btn-active-border-color: transparent;
+        font-weight: 700;
+    }
+
+    .btn-secondary {
+        @include mm-dark-key;
+    }
+
+    // Pestaña del pedido en curso: su número en cifras de ancho fijo
+    .floating-order-container .btn {
+        font-family: $mm-font-mono;
+    }
+
+    .input-container {
+        background-color: $mm-key !important; // bg-view
+        border-color: $mm-keyline;
+        color: $mm-text;
+
+        .o_input {
+            background-color: transparent;
+            color: $mm-text !important; // text-body
+
+            &::placeholder {
+                color: $mm-dim;
+            }
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 5. El ticket (panel izquierdo de la pantalla de productos)
+// ---------------------------------------------------------------------------
+.pos .product-screen .leftpane {
+    --orderline-selected: #{$mm-row-selected};
+    background-color: $mm-panel !important; // bg-view
+    border-color: #000 !important;
+    color: $mm-text;
+    scrollbar-color: $mm-keyline $mm-panel;
+
+    .text-muted {
+        color: $mm-dim !important;
+    }
+
+    .text-danger {
+        color: $mm-danger-on-dark !important;
+    }
+
+    .text-success {
+        color: $mm-success-on-dark !important;
+    }
+
+    .orderline {
+        border-bottom-color: #242C37;
+        font-size: 1.07em;
+
+        > div {
+            padding-top: .7rem !important;
+            padding-bottom: .7rem !important;
+        }
+
+        &:hover {
+            background-color: $mm-row-hover;
+        }
+
+        // En pantallas táctiles Odoo pone el "hover" en blanco: aquí no debe verse
+        @media (hover: none) {
+            &:hover {
+                background-color: transparent;
+            }
+        }
+
+        &.selected, &.selected:hover {
+            background-color: var(--orderline-selected);
+            box-shadow: inset 5px 0 0 $mm-amber;
+        }
+
+        &.has-change::before {
+            background-color: $mm-amber;
+        }
+
+        .qty {
+            font-family: $mm-font-mono;
+            color: $mm-amber;
+        }
+
+        .price {
+            font-family: $mm-font-mono;
+        }
+
+        .info-list {
+            color: $mm-dim;
+        }
+
+        // Leyenda "Regalo para ..." de gift_registry_pos
+        .gift-registry-info {
+            color: $mm-cyan;
+        }
+    }
+
+    // Franja del total
+    .order-summary {
+        background-color: $mm-night;
+        border-color: #000 !important;
+        padding: .85rem .75rem !important;
+
+        > div {
+            align-items: baseline;
+            font-size: .8rem !important; // fs-3
+            letter-spacing: .16em;
+            text-transform: uppercase;
+        }
+
+        .total {
+            font-family: $mm-font-mono;
+            font-size: 2rem;
+            letter-spacing: 0;
+            color: $mm-amber;
+        }
+    }
+
+    // Botones de control (Cliente, Lista de regalos, Nota...) y otros del panel
+    .btn-secondary {
+        @include mm-dark-key;
+    }
+
+    // Letra algo menor para que "Cliente" y "Lista de regalos" quepan sin cortarse
+    .control-buttons .btn {
+        padding-left: .6rem;
+        padding-right: .6rem;
+        font-size: .95rem;
+    }
+
+    // "Cliente" completo; un nombre de cliente largo se sigue recortando con "..."
+    .control-buttons .set-partner {
+        min-width: 5.6rem;
+    }
+
+    // Teclado numérico: teclas separadas y oscuras
+    .numpad {
+        gap: 6px;
+        padding: 2px 0;
+    }
+
+    .numpad-button {
+        --bg: #{$mm-key};
+        --hover-bg: #{$mm-key-hover};
+        --border-color: #{$mm-keyline};
+        border-radius: $border-radius !important; // rounded-0 y esquinas fijas de Odoo
+        color: $mm-text;
+
+        &.active {
+            --bg: #{$mm-text};
+            --border-color: #{$mm-text};
+            color: $mm-night;
+        }
+
+        &:disabled {
+            background-color: $mm-key;
+            opacity: .45;
+        }
+
+        // Odoo distingue estas teclas con un fondo pastel; aquí, con el borde
+        &.o_colorlist_item_numpad_color_3 { // +/-
+            --border-color: #{rgba($mm-amber, .55)};
+        }
+
+        &.o_colorlist_item_numpad_color_6, // punto decimal
+        &.o_colorlist_item_numpad_color_1 { // borrar
+            --border-color: #{rgba($mm-danger-on-dark, .6)};
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// 6. Zona de productos
+// ---------------------------------------------------------------------------
+.pos .pos-content,
+.pos .product-screen .rightpane {
+    background-color: $mm-canvas !important; // bg-100 / bg-secondary
+}
+
+.category-button {
+    font-weight: 700;
+}
+
+.rightpane .product {
+    --btn-border-color: #{$mm-line};
+
+    // Montserrat es ancha: un poco más compacta para que el nombre se corte menos
+    .product-name {
+        letter-spacing: -.015em;
+    }
+}
+
+// Campo con el cursor dentro: aro ámbar, visible sobre claro y sobre oscuro
+.form-control:focus,
+.form-control:focus-within {
+    border-color: $mm-amber-active;
+    box-shadow: 0 0 0 .2rem rgba($mm-amber, .28);
+    outline: 0;
+}
+
+// ---------------------------------------------------------------------------
+// 7. Pantalla de inicio: fondo liso en lugar del degradado morado de Odoo
+// ---------------------------------------------------------------------------
+.login-overlay {
+    --homeMenu-bg-color: #{$mm-canvas};
+    --homeMenu-bg-image: none;
+}
+
+// ---------------------------------------------------------------------------
+// 8. Recibo: conserva la letra que tenía, para no alterar la impresión
+// ---------------------------------------------------------------------------
+.pos-receipt {
+    font-family: o-add-unicode-support-font($o-system-fonts);
+}

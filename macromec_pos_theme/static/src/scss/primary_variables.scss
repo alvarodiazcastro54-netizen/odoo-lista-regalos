@@ -1,0 +1,25 @@
+// Macromec · variables de marca para la caja
+//
+// Odoo declara estas variables con "!default". Este archivo se carga al
+// principio del bundle de la caja, así que los valores de aquí son los que
+// quedan. Solo afecta al Punto de Venta: el backend usa otro bundle.
+
+// Color principal "tinta": de él salen enlaces, casillas, selección y foco,
+// que así siempre se leen bien sobre fondo claro. El ámbar de los botones de
+// acción se define aparte, en pos_theme.scss.
+$o-brand-primary: #1A2029;
+$o-brand-odoo: #1A2029;
+
+// Letra: "Macromec Sans" es Montserrat con los pesos de fonts.scss; de respaldo
+// quedan la Montserrat que trae Odoo y las letras del sistema.
+$o-font-family-sans-serif: (
+    "Macromec Sans", "Montserrat", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue",
+    Arial, "Odoo Unicode Support Noto", sans-serif,
+    "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"
+);
+$o-headings-font-family: $o-font-family-sans-serif;
+
+// Esquinas algo más redondeadas en botones, campos, tarjetas y diálogos
+$o-border-radius: 0.625rem;    // 10 px
+$o-border-radius-sm: 0.5rem;   //  8 px
+$o-border-radius-lg: 0.75rem;  // 12 px

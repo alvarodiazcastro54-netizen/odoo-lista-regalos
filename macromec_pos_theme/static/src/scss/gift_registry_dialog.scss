@@ -1,0 +1,165 @@
+// Macromec · piel del diálogo de Lista de regalos (el contenido lo pone gift_registry_pos)
+//
+// Usa el mismo lenguaje que el ticket: hoja oscura, cifras en ámbar y cian para
+// lo que identifica a la lista. Todo queda acotado a .o_gift_registry_dialog,
+// así que los demás diálogos de Odoo siguen claros.
+// Las variables $mm-* y el mixin mm-dark-key vienen de pos_theme.scss.
+
+.o_gift_registry_dialog {
+    background-color: $mm-panel;
+    border: 0;
+    color: $mm-text;
+
+    // --- Marco del diálogo ---
+    .modal-header {
+        background-color: $mm-night;
+        border-bottom-color: #000;
+        color: $mm-text;
+
+        .modal-title {
+            color: $mm-text;
+            font-size: .95rem;
+            font-weight: 700;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+        }
+
+        .btn-close {
+            filter: invert(1) grayscale(1) brightness(2);
+        }
+    }
+
+    .modal-footer {
+        border-top-color: $mm-keyline;
+
+        .btn-secondary {
+            @include mm-dark-key;
+        }
+    }
+
+    // --- Utilidades de Bootstrap que el contenido usa, adaptadas al fondo oscuro ---
+    .text-muted {
+        color: $mm-dim !important;
+    }
+
+    .text-danger {
+        color: $mm-danger-on-dark !important;
+    }
+
+    .text-success {
+        color: $mm-success-on-dark !important;
+    }
+
+    .border, .border-top {
+        border-color: $mm-keyline !important;
+    }
+
+    .alert-warning {
+        background-color: rgba($mm-amber, .14);
+        border-color: rgba($mm-amber, .45);
+        color: $mm-text;
+    }
+
+    // --- Buscador ---
+    .gr-search .form-control {
+        background-color: $mm-key;
+        border-color: $mm-keyline;
+        color: $mm-text;
+        font-family: $mm-font-mono;
+
+        &::placeholder {
+            color: $mm-dim;
+            font-family: $font-family-sans-serif;
+        }
+
+        &:focus {
+            border-color: $mm-amber;
+            box-shadow: 0 0 0 .2rem rgba($mm-amber, .22);
+        }
+    }
+
+    .gr-empty {
+        color: $mm-dim !important;
+    }
+
+    // --- Código y avance ---
+    .gr-code {
+        color: $mm-cyan;
+        font-family: $mm-font-mono;
+    }
+
+    .gr-progress-label b {
+        color: $mm-amber;
+        font-family: $mm-font-mono;
+        font-size: 1.3rem;
+    }
+
+    .gr-progress-bar {
+        background-color: #2B3542;
+
+        .progress-bar {
+            background-color: $mm-amber;
+        }
+
+        &.gr-progress-bar--complete .progress-bar {
+            background-color: $mm-success-on-dark !important; // bg-success
+        }
+
+        // Un segmento por regalo: la máscara recorta la barra en --gr-segments tramos
+        &.gr-progress-bar--segmented {
+            $gap: 4px;
+            $mask: repeating-linear-gradient(
+                90deg,
+                #000 0 calc(100% / var(--gr-segments) - #{$gap}),
+                transparent calc(100% / var(--gr-segments) - #{$gap}) calc(100% / var(--gr-segments))
+            );
+            border-radius: 3px;
+            -webkit-mask-image: $mask;
+            mask-image: $mask;
+        }
+    }
+
+    // --- Resultados de la búsqueda ---
+    .gr-result {
+        @include mm-dark-key;
+        --btn-active-color: #{$mm-text};
+        --btn-active-bg: #{$mm-row-selected};
+        --btn-active-border-color: #{$mm-amber};
+    }
+
+    // --- Cabecera de la lista elegida ---
+    .gr-head {
+        background-color: $mm-night;
+        border-color: transparent !important;
+        border-left: 5px solid $mm-cyan !important;
+    }
+
+    .gr-message {
+        color: $mm-dim;
+    }
+
+    // --- Productos ---
+    .gr-photo {
+        background-color: #fff;
+        border-color: transparent !important;
+    }
+
+    .gr-qty-number {
+        color: $mm-amber;
+        font-family: $mm-font-mono;
+    }
+
+    .gr-line--pending {
+        background-color: $mm-row-selected;
+        box-shadow: inset 5px 0 0 $mm-amber;
+
+        .gr-qty-number {
+            color: $mm-amber;
+        }
+    }
+
+    .gr-out {
+        background-color: $mm-danger-on-dark !important; // text-bg-danger
+        color: $mm-night !important;
+    }
+}
