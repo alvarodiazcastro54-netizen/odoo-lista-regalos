@@ -10,6 +10,7 @@
                 <field name="partner_id"/>
                 <field name="event_type_id"/>
                 <field name="event_date"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show"/>
                 <field name="progress" widget="progressbar"/>
                 <field name="has_exceeded_lines" column_invisible="1"/>
                 <field name="state" widget="badge"
@@ -99,8 +100,13 @@
                 <field name="name" string="Lista" filter_domain="['|', '|', ('name', 'ilike', self), ('title', 'ilike', self), ('partner_id', 'child_of', raw_value)]"/>
                 <field name="partner_id"/>
                 <filter name="active_lists" string="Activas" domain="[('state', '=', 'active')]"/>
+                <!-- Los separadores hacen que estado, fecha y excedidos se combinen con "Y" -->
+                <separator/>
+                <filter name="event_today" string="Evento hoy"
+                        domain="[('event_date', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter name="next_30" string="Evento en 30 días"
                         domain="[('event_date', '&gt;=', context_today().strftime('%Y-%m-%d')), ('event_date', '&lt;=', (context_today() + relativedelta(days=30)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
                 <filter name="exceeded" string="Con excedidos" domain="[('has_exceeded_lines', '=', True)]"/>
                 <separator/>
                 <filter name="group_event_type" string="Tipo de evento" context="{'group_by': 'event_type_id'}"/>

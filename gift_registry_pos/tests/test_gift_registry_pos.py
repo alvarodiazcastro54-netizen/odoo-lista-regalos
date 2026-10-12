@@ -86,3 +86,22 @@ class TestGiftRegistryPos(TestPoSCommon):
         self.assertTrue(Registry.search_for_pos("12345678", self.config.id)["gift.registry"])
         # El DNI parcial no encuentra nada
         self.assertFalse(Registry.search_for_pos("123456", self.config.id)["gift.registry"])
+
+    def test_04_event_today_notice_after_sales(self):
+        """El aviso diario refleja lo vendido en caja."""
+        self.gift_list.event_date = fields.Date.context_today(
+            self.gift_list.with_context(tz="America/Lima"))
+        prefix = f"Hoy: Cumpleaños de Ana · {self.gift_list.name} · "
+        self.open_new_session()
+        self._sell(1)
+        self.assertEqual(
+            self.gift_list._get_event_today_summary(),
+            prefix + "1 de 2 regalos cubiertos (50 %)")
+
+        self._sell(1)
+        with self.enter_registry_test_mode():
+            self.env.ref("gift_registry.ir_cron_gift_registry_event_today").method_direct_trigger()
+        notices = self.env["mail.activity"].search([
+            ("res_model", "=", "gift.registry"), ("res_id", "=", self.gift_list.id)])
+        self.assertTrue(notices)
+        self.assertEqual(set(notices.mapped("summary")), {prefix + "Lista completa"})

@@ -1,9 +1,18 @@
+import logging
 from datetime import timedelta
 
 from odoo import _, api, fields, models
 from odoo.exceptions import UserError, ValidationError
+from odoo.tools import float_compare, float_round
+
+_logger = logging.getLogger(__name__)
 
 CONSENT_TEXT_VERSION = "2026-10"
+
+
+def _format_qty(qty):
+    """3.0 -> "3"; 2.5 -> "2.5" (las cantidades casi siempre son enteras)."""
+    return f"{qty:.2f}".rstrip("0").rstrip(".")
 
 
 class GiftRegistry(models.Model):
@@ -50,8 +59,10 @@ class GiftRegistry(models.Model):
         default="giver", required=True,
     )
     user_id = fields.Many2one(
-        "res.users", "Vendedor responsable", default=lambda self: self.env.user,
+        "res.users", "Responsable", default=lambda self: self.env.user,
     )
+    # Día en que se creó el aviso "evento hoy": evita duplicarlo si la tarea corre otra vez
+    event_notice_date = fields.Date("Aviso de evento creado el", readonly=True, copy=False)
     company_id = fields.Many2one(
         "res.company", required=True, index=True,
         default=lambda self: self.env.company,
@@ -164,3 +175,65 @@ class GiftRegistry(models.Model):
         template = self.env.ref("gift_registry.mail_template_registry_reminder")
         for registry in self.search([("state", "=", "active"), ("event_date", "=", target)]):
             template.send_mail(registry.id)
+
+    # --- Aviso diario de eventos ----------------------------------------------
+    def _get_event_today_summary(self):
+        """Texto del aviso: "Hoy: Baby shower de Ana · LR-00012 · 3 de 5 regalos cubiertos (60 %)".
+
+        Lo cubierto se cuenta por producto y sin pasar de lo deseado: un producto
+        regalado de más no compensa a otro que sigue pendiente.
+        """
+        self.ensure_one()
+        wanted = sum(self.line_ids.mapped("qty_wanted"))
+        covered = sum(
+            max(min(line.qty_gifted, line.qty_wanted), 0.0) for line in self.line_ids
+        )
+        if not wanted:
+            status = _("sin productos")
+        elif float_compare(covered, wanted, precision_digits=2) >= 0:
+            status = _("Lista completa")
+        else:
+            # Tope de 99: mientras falte algo no debe leerse "100 %"
+            percent = min(int(float_round(covered / wanted * 100, precision_digits=0)), 99)
+            status = _(
+                "%(covered)s de %(wanted)s regalos cubiertos (%(percent)s %%)",
+                covered=_format_qty(covered), wanted=_format_qty(wanted), percent=percent,
+            )
+        return _(
+            "Hoy: %(title)s · %(code)s · %(status)s",
+            title=self.title, code=self.name, status=status,
+        )
+
+    def _get_event_notice_users(self):
+        """El responsable de la lista; si no tiene (o está archivado), los administradores."""
+        self.ensure_one()
+        if self.user_id.active:
+            return self.user_id
+        managers = self.env.ref("gift_registry.group_gift_registry_manager").all_user_ids
+        return managers.filtered(
+            lambda user: user.active and not user.share and self.company_id in user.company_ids
+        )
+
+    @api.model
+    def _cron_event_today_activity(self):
+        """Crea una actividad "Por hacer" por cada lista activa cuyo evento es hoy.
+
+        "Hoy" sale de la zona horaria del contexto (la tarea programada envía la
+        de Perú). Sin ella Odoo usaría UTC, que desde las 7 p. m. de Lima ya es
+        el día siguiente.
+        """
+        today = fields.Date.context_today(self)
+        registries = self.search([("state", "=", "active"), ("event_date", "=", today)])
+        for registry in registries.filtered(lambda r: r.event_notice_date != today):
+            users = registry._get_event_notice_users()
+            if not users:
+                _logger.warning(
+                    "Lista %s: sin responsable ni administradores a quien avisar", registry.name)
+                continue
+            summary = registry._get_event_today_summary()
+            for user in users:
+                registry.activity_schedule(
+                    "mail.mail_activity_data_todo", date_deadline=today,
+                    summary=summary, user_id=user.id,
+                )
+            registry.event_notice_date = today
