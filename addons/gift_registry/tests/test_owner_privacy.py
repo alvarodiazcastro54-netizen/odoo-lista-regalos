@@ -11,7 +11,7 @@ class TestOwnerPrivacy(TransactionCase):
         super().setUpClass()
         cls.owner = cls.env["res.partner"].create({
             "name": "Lucía Ramos", "vat": "45678912",
-            "phone": "+51 987 654 321", "email": "lucia.ramos@gmail.com",
+            "phone": "+51 987 654 321", "email": "lucia.ramos@example.com",
         })
         cls.seller = new_test_user(
             cls.env, login="lr_cajera",
@@ -33,7 +33,7 @@ class TestOwnerPrivacy(TransactionCase):
     def test_masked_owner_data(self):
         self.assertEqual(self.gift_list.partner_vat_masked, "••••8912")
         self.assertEqual(self.gift_list.partner_phone_masked, "••••321")
-        self.assertEqual(self.gift_list.partner_email_masked, "l•••@gmail.com")
+        self.assertEqual(self.gift_list.partner_email_masked, "l•••@example.com")
 
         # Sin datos no se muestra nada; un dato muy corto no se revela
         bare = self._create_list(self.env["res.partner"].create({"name": "Sin datos", "vat": "123"}))

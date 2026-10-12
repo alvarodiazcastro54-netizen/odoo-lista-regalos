@@ -27,7 +27,7 @@ def _mask_tail(value, visible):
 
 
 def _mask_email(value):
-    """Primera letra y dominio: "lucia.ramos@gmail.com" -> "l•••@gmail.com"."""
+    """Primera letra y dominio: "lucia.ramos@example.com" -> "l•••@example.com"."""
     name, at, domain = (value or "").strip().partition("@")
     if not name or not at:
         return _mask_tail(value, 0)
